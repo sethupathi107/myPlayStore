@@ -5,6 +5,7 @@ import path from "node:path";
 import fs from "fs/promises";
 import { fileURLToPath } from "node:url";
 import client from "../utils/redisClient.js";
+import { forbidUnlessOwnerOrAdmin } from "../utils/authorize.js";
 const EXP = process.env.EXP;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -91,6 +92,9 @@ async function getAllApps(req, res) {
         if (!hasFilters) {
             try{
                 await client.set(cacheKey,JSON.stringify(payload),{EX:60});
+                // Tracked separately so invalidation can target exactly the
+                // keys this endpoint created instead of scanning the keyspace.
+                await client.sAdd(APP_LIST_CACHE_KEYS_SET, cacheKey);
             } catch (error){
                 logger.error("Redis SET failed: ",error.message);
             }
@@ -105,11 +109,18 @@ async function getAllApps(req, res) {
 
 // The list is cached per page/limit combination (app:all:1:20, app:all:2:20,
 // ...) so a plain `del("app:all")` after a write never actually cleared it -
-// this clears every cached page instead.
+// this clears every cached page instead. Cache keys are tracked in
+// APP_LIST_CACHE_KEYS_SET as they're created, rather than found via `KEYS
+// app:all:*`, since KEYS is a blocking O(N) full-keyspace scan that would
+// stall every other Redis client (including the rate limiter) on every
+// app write as the cache grows.
+const APP_LIST_CACHE_KEYS_SET = "app:all:keys";
+
 async function invalidateAppListCache() {
     try {
-        const keys = await client.keys("app:all:*");
+        const keys = await client.sMembers(APP_LIST_CACHE_KEYS_SET);
         if (keys.length > 0) await client.del(keys);
+        await client.del(APP_LIST_CACHE_KEYS_SET);
     } catch (error) {
         logger.error("Redis DEL (app list cache) failed: ", error.message);
     }
@@ -268,10 +279,7 @@ async function updateApp(req, res) {
             return res.status(404).json({ message: "App not found" });
         }
 
-        if (app.userId !== req.user.id && req.user.role !== "admin") {
-            logger.warn(`User ${req.user.id} attempted to update app ${app.id} owned by ${app.userId}`);
-            return res.status(403).json({ message: "You do not have permission to modify this app" });
-        }
+        if (forbidUnlessOwnerOrAdmin(req, res, app, { action: "update" })) return;
         const oldFilename = app.applicationURL;
 
         if(name!== undefined) app.name = name;
@@ -325,10 +333,7 @@ async function deleteApp(req, res) {
             return res.status(404).json({ message: "App not found" });
         }
 
-        if (app.userId !== req.user.id && req.user.role !== "admin") {
-            logger.warn(`User ${req.user.id} attempted to delete app ${app.id} owned by ${app.userId}`);
-            return res.status(403).json({ message: "You do not have permission to delete this app" });
-        }
+        if (forbidUnlessOwnerOrAdmin(req, res, app, { action: "delete", permissionVerb: "delete" })) return;
 
         const imageFilenames = (app.images || []).map((image) => image.filename);
 

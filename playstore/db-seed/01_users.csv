@@ -1,0 +1,36 @@
+id,username,email,password,role,createdAt,updatedAt
+e9878408-1451-428d-bdcf-52911cf0b046,Admin,admin@storefront.dev,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,admin,2026-09-22T10:22:45+00,2026-09-22T10:22:45+00
+c739f2fc-dd85-46be-b5e8-6d764a514508,Ava Osei,ava.osei.0@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-19T02:00:44+00,2026-09-19T02:00:44+00
+efbc2aeb-f83f-4d5d-9753-1c1696c6a099,Liam Okafor,liam.okafor.1@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-10T18:32:16+00,2026-09-10T18:32:16+00
+72e65af5-9e91-4099-88c2-8972779d4108,Noah Moreau,noah.moreau.2@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-07-26T02:31:43+00,2026-07-26T02:31:43+00
+144d9db2-8702-4b92-9711-0a57a3faa7c8,Emma Duarte,emma.duarte.3@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-08T20:31:39+00,2026-09-08T20:31:39+00
+85830fbe-7792-4344-8e85-6c33e9f1f368,Oliver Reed,oliver.reed.4@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-06-16T22:40:27+00,2026-06-16T22:40:27+00
+4dfbca3c-b477-47d5-81da-3552059e9654,Mia Duarte,mia.duarte.5@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-08-19T21:39:17+00,2026-08-19T21:39:17+00
+eaba9a70-e32b-43b0-a1ca-9d8c50e909d3,Lucas Kessler,lucas.kessler.6@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-08-31T09:44:09+00,2026-08-31T09:44:09+00
+cb73a5d8-749e-41c6-8bbf-3539531312d2,Sophia Hassan,sophia.hassan.7@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-08-05T05:41:39+00,2026-08-05T05:41:39+00
+27aa2626-9c22-4ce9-b460-802788397fab,Ethan Ivanov,ethan.ivanov.8@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-07-29T06:16:02+00,2026-07-29T06:16:02+00
+3d51eefd-8b09-49a2-8ad2-305676775b05,Isla Silva,isla.silva.9@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-17T08:09:00+00,2026-09-17T08:09:00+00
+35732930-67f3-4140-8997-66b3e77e7014,Mason Patel,mason.patel.10@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-16T01:24:31+00,2026-09-16T01:24:31+00
+4628006c-2634-45e2-91a2-41a475e39115,Zoe Osei,zoe.osei.11@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-12T05:11:30+00,2026-09-12T05:11:30+00
+7436818b-8528-444b-ab38-4a58222f7851,Leo Novak,leo.novak.12@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-07-08T02:57:42+00,2026-07-08T02:57:42+00
+721b08ab-8cae-4b82-a275-50139ff79484,Nora Okafor,nora.okafor.13@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-08-18T06:25:50+00,2026-08-18T06:25:50+00
+20a3c832-08ce-446f-b7f8-e12e142db636,Kai Mercer,kai.mercer.14@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-08-26T08:50:55+00,2026-08-26T08:50:55+00
+af1f384e-71f2-4620-a619-b67a7f0f1a84,Freya Kessler,freya.kessler.15@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-07-02T08:21:14+00,2026-07-02T08:21:14+00
+05f06301-174c-4ce0-88f7-31f622e82235,Theo Nakamura,theo.nakamura.16@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-21T01:12:02+00,2026-09-21T01:12:02+00
+b40e34f2-cd9d-4c15-b942-eeb1cdac5e68,Ines Okafor,ines.okafor.17@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-07-21T18:27:06+00,2026-07-21T18:27:06+00
+ef9245ec-a5b3-4e80-89e5-bcef7b11578c,Arlo Farris,arlo.farris.18@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-07-22T03:11:04+00,2026-07-22T03:11:04+00
+ac6675e6-0b38-42d4-bf38-8959faea8863,Suki Voss,suki.voss.19@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-07-24T15:46:26+00,2026-07-24T15:46:26+00
+ac121499-0280-4b23-88b0-0f925f3a301e,Dev Okafor,dev.okafor.20@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-08T00:52:45+00,2026-09-08T00:52:45+00
+5f4a0667-45b5-469d-b30e-8b5129c82f54,Priya Patel,priya.patel.21@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-08-15T16:56:03+00,2026-08-15T16:56:03+00
+5761bde8-ab17-4155-9890-228859ae9d8c,Omar Novak,omar.novak.22@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-07-21T06:42:00+00,2026-07-21T06:42:00+00
+19367001-6484-4ad9-9f0d-fa10ce6462b6,Lena Mercer,lena.mercer.23@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-07-23T11:51:45+00,2026-07-23T11:51:45+00
+c68d9407-3284-43e1-b16e-85a8ae34979b,Jonas Larsson,jonas.larsson.24@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-08-28T19:01:11+00,2026-08-28T19:01:11+00
+f37f9e27-268c-49a1-be3a-cf722ed3d48b,Talia Reed,talia.reed.25@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-07T06:48:30+00,2026-09-07T06:48:30+00
+c865fd65-6910-45a5-9252-69f8fd02201b,Ravi Farris,ravi.farris.26@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-13T04:27:10+00,2026-09-13T04:27:10+00
+735fc5cb-dd91-46b6-94d6-d68143ec3f0e,Sana Novak,sana.novak.27@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-06-20T12:09:56+00,2026-06-20T12:09:56+00
+cccb5524-84e6-4404-bf62-c525a9439bd7,Milo Mercer,milo.mercer.28@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-11T21:26:25+00,2026-09-11T21:26:25+00
+581ab6c1-719f-4c66-be38-a82e60863626,Wren Ivanov,wren.ivanov.29@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-07-01T14:47:30+00,2026-07-01T14:47:30+00
+606a0a59-c082-4179-8dea-ce74f437ed4e,Bodhi Costa,bodhi.costa.30@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-06-27T12:42:33+00,2026-06-27T12:42:33+00
+4c7d3b7c-ba64-4329-a995-be4990a7b264,Saoirse Costa,saoirse.costa.31@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-12T03:18:33+00,2026-09-12T03:18:33+00
+9937bb3c-c14e-4c6e-a02f-cc0ba7e326b6,Kenji Farris,kenji.farris.32@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-09-04T14:50:26+00,2026-09-04T14:50:26+00
+7c912978-b1d3-4b80-862a-cf640b4d54dd,Amara Costa,amara.costa.33@example.com,$2b$10$.4eeYDr6edo7gS5ENU9ezu04hKTBrTSR32KUZuP4D7tsuM..JfOdq,user,2026-08-16T18:19:42+00,2026-08-16T18:19:42+00

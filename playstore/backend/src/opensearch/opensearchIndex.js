@@ -3,7 +3,7 @@ import { logger } from "../utils/logger.js";
 
 export const APPLICATIONS_INDEX = "applications";
 
-const INDEX_BODY = {
+export const INDEX_BODY = {
     settings: {
         analysis: {
             analyzer: {

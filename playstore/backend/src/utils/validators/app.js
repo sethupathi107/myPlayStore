@@ -1,4 +1,22 @@
-import { body, param } from "express-validator";
+import { body, param, query } from "express-validator";
+
+const getAllAppsValidator = [
+    query("page")
+        .optional()
+        .isInt({ min: 1 }).withMessage("page must be a positive integer"),
+    query("limit")
+        .optional()
+        .isInt({ min: 1 }).withMessage("limit must be a positive integer"),
+    query("categoryId")
+        .optional()
+        .isUUID().withMessage("categoryId must be a valid UUID"),
+    query("excludeId")
+        .optional()
+        .isUUID().withMessage("excludeId must be a valid UUID"),
+    query("mine")
+        .optional()
+        .isIn(["true", "false", "1", "0"]).withMessage("mine must be true or false"),
+];
 
 const createAppValidator = [
     body("name")
@@ -46,6 +64,7 @@ const appIdBodyValidator = [
 ];
 
 export default {
+    getAllAppsValidator,
     downloadAppValidator,
     createAppValidator,
     updateAppValidator,

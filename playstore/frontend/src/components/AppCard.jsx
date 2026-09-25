@@ -19,16 +19,18 @@ export function AppCard({ app: rawApp }) {
       setIconUrl(null);
       return;
     }
-    let objectUrl = null;
+    let cancelled = false;
+    // imagesApi caches and shares this object URL across every card using
+    // the same icon, so it's never revoked here - revoking on this card's
+    // unmount would break the <img> for any other card still showing it.
     imagesApi
       .getObjectUrl(app.id, app.iconImageId)
       .then((url) => {
-        objectUrl = url;
-        setIconUrl(url);
+        if (!cancelled) setIconUrl(url);
       })
       .catch(() => {});
     return () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      cancelled = true;
     };
   }, [app.id, app.iconImageId]);
 

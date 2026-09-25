@@ -18,8 +18,11 @@ const signinSignupLimiter = rateLimiter({
     message: "Too many sign-in/signup attempts. Please try again in a minute.",
 });
 
-router.post("/signup", signinSignupLimiter, authValidators.signupValidator, validateRequest, authentication.signup);
-router.post("/signin", signinSignupLimiter, authValidators.signinValidator, validateRequest, authentication.signin);
+// Validation runs before the rate limiter so malformed requests (typos in
+// email/password shape, etc.) get a normal 400 instead of quietly eating a
+// slot from the 5/min IP quota meant for actual signin/signup attempts.
+router.post("/signup", authValidators.signupValidator, validateRequest, signinSignupLimiter, authentication.signup);
+router.post("/signin", authValidators.signinValidator, validateRequest, signinSignupLimiter, authentication.signin);
 router.post("/refresh-token", authValidators.refreshTokenValidator, validateRequest, authentication.refreshToken);
 router.post("/logout", authValidators.refreshTokenValidator, validateRequest, authentication.logout);
 router.post("/logout-all", authValidators.refreshTokenValidator, validateRequest, authentication.logoutAll);

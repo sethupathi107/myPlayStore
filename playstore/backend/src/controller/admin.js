@@ -349,15 +349,12 @@ async function createUser(){
         
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        let user;
-        const use = await User.findOne({email:email})
-        console.log(use);
-        if(!use){
+        let user = await User.findOne({ where: { email } });
+        if (!user) {
             user = await User.create({ username:name, email : email, password : hashedPassword, role: "admin" });
         }
 
-
-        logger.info(`User ${user.id} signed up`);   
+        logger.info(`User ${user.id} signed up`);
 
         if(process.env.ENVIRONMENT==="dev"){
             console.log("User name is -> sethupathioffical107@gmail.com")

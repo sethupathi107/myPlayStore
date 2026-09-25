@@ -7,7 +7,7 @@ import queryToBody from "../middlewares/queryToBody.js";
 
 const router = express.Router();
 
-router.get("/", appController.getAllApps);
+router.get("/", appValidators.getAllAppsValidator, validateRequest, appController.getAllApps);
 router.get("/search", appController.searchApps);
 router.get("/hot", appController.getHotApps);
 router.get("/hot-by-category", appController.getHotAppsByCategory);

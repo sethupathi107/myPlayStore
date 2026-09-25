@@ -17,7 +17,6 @@ import "./src/utils/exportWorker.js";
 import bullBoardAdapter from "./src/utils/bullBoard.js";
 import { ensureApplicationsIndex } from "./src/opensearch/opensearchIndex.js";
 import "./src/opensearch/searchIndexWorker.js";
-import { blockedIpMiddleware, rateLimiter, getClientIp } from "./src/middleware/rateLimiter.js";
 
 await ensureApplicationsIndex();
 
@@ -59,48 +58,10 @@ app.use(
     }),
 );
 
-app.use(express.json());
-
-// Manually-banned IPs (see blockIp()/unblockIp() in rateLimiter.js) are
-// checked everywhere, signed in or not - unrelated to the request-rate
-// limiting below, which is scoped per endpoint group instead of global.
-app.use(blockedIpMiddleware);
-
-app.use("/v1/sign", authRoutes);
+app.use(express.json())
+app.use("/v1/sign",authRoutes);
 app.use("/queues", bullBoardAdapter.getRouter());
 app.use(auth);
-
-// Everything past this point has a verified access token, so requests are
-// throttled per signed-in user (keyed by their user id) rather than per IP -
-// otherwise every user behind the same office/carrier IP would share one
-// limit. Sign-in/signup, which run before `auth` and have no user id yet,
-// get their own IP-keyed limiter directly on those two routes instead (see
-// routes/auth.js).
-app.use(
-    rateLimiter({
-        windowMs: Number(process.env.RATE_LIMIT_USER_WINDOW_MS) || 1000,
-        maxRequests: Number(process.env.RATE_LIMIT_USER_MAX) || 5,
-        keyPrefix: "rate-limit:user:",
-        keyGenerator: (req) => req.user?.id || getClientIp(req),
-        message: "Too many requests. Please slow down.",
-    })
-);
-
-// /v1/images gets its own, more generous limiter: a single app list page can
-// render dozens of AppCards, each fetching its own icon blob on mount, so
-// those bursts would otherwise exhaust the 5 req/s general bucket above and
-// leave most icons falling back to the letter avatar.
-app.use(
-    "/v1/images",
-    rateLimiter({
-        windowMs: Number(process.env.RATE_LIMIT_IMAGES_WINDOW_MS) || 1000,
-        maxRequests: Number(process.env.RATE_LIMIT_IMAGES_MAX) || 60,
-        keyPrefix: "rate-limit:images:",
-        keyGenerator: (req) => req.user?.id || getClientIp(req),
-        message: "Too many requests. Please slow down.",
-    })
-);
-
 app.use("/v1/app",application);
 app.use("/v1/images",image);
 app.use("/v1/category",category);
@@ -118,11 +79,11 @@ app.use((err, req, res, next) => {
         }
         return res.status(400).json({ message: err.message });
     }
-    next(err);
+    if (err) {
+        logger.error(err.stack || err.message);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+    next();
 });
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
-    logger.info(`Rate limit: 5 requests/min per IP on sign-in/signup, 5 requests/sec per user token elsewhere`);
-});
+app.listen(4000, () => console.log('Server running on port 4000'));

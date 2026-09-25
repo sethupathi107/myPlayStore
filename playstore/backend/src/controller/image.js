@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { logger } from "../utils/logger.js";
 import { Image, Application } from "../sequelize/config/database.js";
 import { invalidateAppCache } from "./app.js";
+import { forbidUnlessOwnerOrAdmin } from "../utils/authorize.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOAD_DIR = path.join(__dirname, "../../uploads/images");
@@ -35,10 +36,7 @@ async function addAppImage(req, res) {
             return res.status(404).json({ message: "App not found" });
         }
 
-        if (app.userId !== req.user.id && req.user.role !== "admin") {
-            logger.warn(`User ${req.user.id} attempted to add an image to app ${app.id} owned by ${app.userId}`);
-            return res.status(403).json({ message: "You do not have permission to modify this app" });
-        }
+        if (forbidUnlessOwnerOrAdmin(req, res, app, { action: "add an image to" })) return;
 
         const newImage = await Image.create({
             applicationId,
@@ -77,10 +75,7 @@ async function deleteAppImage(req, res) {
 
         const parentApp = await Application.findByPk(image.applicationId);
 
-        if (parentApp && parentApp.userId !== req.user.id && req.user.role !== "admin") {
-            logger.warn(`User ${req.user.id} attempted to delete image ${image.id} from app ${parentApp.id} owned by ${parentApp.userId}`);
-            return res.status(403).json({ message: "You do not have permission to modify this app" });
-        }
+        if (parentApp && forbidUnlessOwnerOrAdmin(req, res, parentApp, { action: `delete image ${image.id} from` })) return;
 
         const filename = image.filename;
         const wasIcon = parentApp?.iconImageId === image.id;

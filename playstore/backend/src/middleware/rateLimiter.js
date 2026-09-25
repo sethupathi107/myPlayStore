@@ -1,6 +1,18 @@
 import redis from "../utils/redisClient.js";
 import { logger } from "../utils/logger.js";
 
+// Atomically increments the counter and sets its expiry only on the very
+// first increment, in a single round trip - two separate incr/expire calls
+// can leave a key stuck at count=1 with no TTL forever if the process or
+// connection dies in between.
+const INCR_AND_EXPIRE_SCRIPT = `
+local current = redis.call("INCR", KEYS[1])
+if current == 1 then
+  redis.call("EXPIRE", KEYS[1], ARGV[1])
+end
+return current
+`;
+
 export function getClientIp(req) {
   return (
     req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
@@ -31,13 +43,12 @@ export const rateLimiter = (options = {}) => {
       const identifier = keyGenerator(req);
       const key = `${keyPrefix}${identifier}`;
 
-      // Get current request count from Redis
-      const currentCount = await redis.incr(key);
-
-      // Set expiry on first request
-      if (currentCount === 1) {
-        await redis.expire(key, Math.ceil(windowMs / 1000));
-      }
+      // Get current request count from Redis, setting the expiry atomically
+      // on the first request so the two steps can't be split by a crash.
+      const currentCount = await redis.eval(INCR_AND_EXPIRE_SCRIPT, {
+        keys: [key],
+        arguments: [String(Math.ceil(windowMs / 1000))],
+      });
 
       // Set headers
       res.setHeader("X-RateLimit-Limit", maxRequests);

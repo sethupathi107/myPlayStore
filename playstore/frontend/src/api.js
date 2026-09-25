@@ -246,17 +246,31 @@ export const imagesApi = {
 
   // The image itself is a private, authenticated binary route, so it can't
   // just be used as an <img src="..."> - fetch it as a blob and hand back
-  // an object URL the component can put in an <img> tag.
-  getObjectUrl: (applicationId, imageId) =>
-    withAuth(async () => {
+  // an object URL the component can put in an <img> tag. Cached by imageId
+  // (a set of pending/settled promises) so cards re-rendering or remounting
+  // for the same icon - e.g. scrolling a list back into view - reuse the
+  // existing object URL instead of firing another request.
+  getObjectUrl: (applicationId, imageId) => {
+    if (imageObjectUrlCache.has(imageId)) {
+      return imageObjectUrlCache.get(imageId);
+    }
+    const promise = withAuth(async () => {
       const response = await api.get("/images/appImage", {
         params: { applicationId, imageId },
         headers: authHeaders(),
         responseType: "blob",
       });
       return URL.createObjectURL(response.data);
-    }),
+    }).catch((err) => {
+      imageObjectUrlCache.delete(imageId);
+      throw err;
+    });
+    imageObjectUrlCache.set(imageId, promise);
+    return promise;
+  },
 };
+
+const imageObjectUrlCache = new Map();
 
 // -----------------------------------------------------------------------
 // Categories
