@@ -24,6 +24,7 @@ async function run() {
             name: app.name,
             description: app.description,
             categoryId: app.categoryId,
+            iconImageId: app.iconImageId,
             categoryName: app.category?.name ?? null,
             uploaderUsername: app.user?.username ?? null,
             downloads: app.downloads ?? 0,

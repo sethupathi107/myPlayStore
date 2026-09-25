@@ -2,6 +2,7 @@ import { QueryTypes, Op } from "@sequelize/core";
 import client from '../utils/redisClient.js'
 import sequelize, { User, Application, Installed, Logs } from "../sequelize/config/database.js";
 import { logger } from "../utils/logger.js";
+import bcrypt from "bcrypt"
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -107,24 +108,14 @@ async function getActivity(req, res) {
     }
 
     try {
-        const [totalUsers, totalApps, totalDownloads, apps, downloadActivity, users] = await Promise.all([
+        const [totalUsers, totalApps, totalDownloads, users] = await Promise.all([
             User.count(),
             Application.count(),
             Installed.count(),
-            Application.findAll({
-                include: [{ model: User, as: "user", attributes: ["id", "username", "email"] }],
-            }),
-            Installed.findAll({
-                include: [
-                    { model: User, as: "user", attributes: ["id", "username", "email"] },
-                    { model: Application, as: "application", attributes: ["id", "name"] },
-                ],
-                order: [["createdAt", "DESC"]],
-            }),
             User.findAll({ attributes: { exclude: ["password"] } }),
         ]);
 
-        const payload = { totalUsers, totalApps, totalDownloads, apps, downloadActivity, users };
+        const payload = { totalUsers, totalApps, totalDownloads, users };
 
         try{
             await client.set(cacheKey, JSON.stringify(payload), { EX: 60 });
@@ -138,8 +129,6 @@ async function getActivity(req, res) {
             totalUsers,
             totalApps,
             totalDownloads,
-            apps,
-            downloadActivity,
             users,
         });
     } catch (error) {
@@ -360,25 +349,13 @@ async function createUser(){
         
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const {user} = await sequelize.transaction(async(t)=>{
-            // role is never taken from the request body - signup only ever
-            // creates a "user" account. Promoting someone to admin still
-            // requires hand-editing the DB (see CONTEXT.md).
-            const user = await User.create({ username:name, email : email, password : hashedPassword, role: "admin" },{transaction:t});
+        let user;
+        const use = await User.findOne({email:email})
+        console.log(use);
+        if(!use){
+            user = await User.create({ username:name, email : email, password : hashedPassword, role: "admin" });
+        }
 
-    
-            const newUser = {
-                id: user.id,
-                email,
-                role: user.role,
-            };
-            const refreshToken = generateRefreshToken(newUser);
-            const expiresAt = new Date();
-            expiresAt.setHours(expiresAt.getHours() + 1);
-    
-            await Session.create({userId:user.id,token:refreshToken,expireAt:expiresAt },{transaction:t})
-            return {user};
-        })
 
         logger.info(`User ${user.id} signed up`);   
 

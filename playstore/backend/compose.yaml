@@ -19,6 +19,15 @@ services:
       - 9000:4000
     volumes:
       - exports_data:/usr/src/app/exports
+      # Bind-mounted (not a named volume) so files written by a seed
+      # script run on the host (npm run seed:apps, straight on your Mac)
+      # land in the exact same place the running server reads uploads
+      # from - without this, the host's ./uploads and the container's own
+      # /usr/src/app/uploads are two unrelated directories that silently
+      # drift apart, which is exactly what caused the 404s: rows in the
+      # (correctly shared) database pointing at files that only existed
+      # on one side.
+      - ./uploads:/usr/src/app/uploads
 
     depends_on:
       - postgres
@@ -35,7 +44,7 @@ services:
       POSTGRES_DB: postgres
 
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql

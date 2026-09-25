@@ -8,11 +8,14 @@
     "start": "node --env-file=.env server.js",
     "dev": "node --env-file=.env --watch server.js",
     "reindex:apps": "node --env-file=.env src/opensearch/reindexApplications.js",
+    "reset:index": "node --env-file=.env src/opensearch/resetIndex.js",
     "migrate": "node --env-file=.env src/sequelize/config/cli.js up",
     "migrate:down": "node --env-file=.env src/sequelize/config/cli.js down",
     "migrate:status": "node --env-file=.env src/sequelize/config/cli.js pending",
     "migrate:create": "node --env-file=.env src/sequelize/config/cli.js create --folder src/sequelize/config/migrations --name",
-    "seed": "node seed/seed.js"
+    "seed:categories": "node --env-file=.env scripts/seedCategories.js",
+    "seed:apps": "node --env-file=.env scripts/seedApps.js",
+    "seed:downloads": "node --env-file=.env scripts/seedDownloads.js"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +29,7 @@
     "@sequelize/postgres": "^7.0.0-alpha.48",
     "bcrypt": "^6.0.0",
     "bullmq": "^6.3.7",
+    "cors": "^2.8.6",
     "express": "^5.2.1",
     "express-validator": "^7.3.2",
     "ioredis": "^6.0.0",

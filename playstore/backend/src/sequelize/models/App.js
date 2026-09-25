@@ -35,6 +35,14 @@ class Application extends Model {
             },
             as: 'images',
         })
+        Application.belongsTo(models.Image, {
+            foreignKey: {
+                name: 'iconImageId',
+                onDelete: 'SET NULL',
+                onUpdate: 'CASCADE',
+            },
+            as: 'icon',
+        })
     }
 }
   Application.init(
@@ -67,17 +75,21 @@ class Application extends Model {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: { notEmpty: true, len: [2, 50] },
+        validate: { notEmpty: true, len: [2, 150] },
       },
       description: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
-        validate: { notEmpty: true, len: [2, 50] },
+        validate: { notEmpty: true, len: [2, 2000] },
       },
       applicationURL: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: { notEmpty: true, len: [2, 50] },
+      },
+      iconImageId: {
+        type: DataTypes.UUID,
+        allowNull: true,
       },
     },
     {
@@ -88,7 +100,13 @@ class Application extends Model {
   );
 
   Application.addHook("afterDestroy",async(instance, options)=>{
-    const {Image,Installed}=instance.sequelize.models;
+    // Same Set-vs-object gotcha as User.js's afterDestroy hook: this
+    // @sequelize/core v7 alpha exposes sequelize.models as a Set of model
+    // classes, not a {ModelName: Model} object, so look up by .name.
+    const modelsByName = Object.fromEntries(
+        [...instance.sequelize.models].map((model) => [model.name, model])
+    );
+    const {Image,Installed}=modelsByName;
     await Image.destroy({
       where:{
         applicationId:instance.id

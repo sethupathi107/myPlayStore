@@ -20,6 +20,7 @@ const INDEX_BODY = {
             },
             description: { type: "text" },
             categoryId: { type: "keyword" },
+            iconImageId: { type: "keyword" },
             categoryName: {
                 type: "keyword",
                 fields: {

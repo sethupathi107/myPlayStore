@@ -174,9 +174,15 @@ async function signup(req,res){
     } catch (error) {
         logger.error(error.stack || error.message);
 
-        if(error.code=="23505"){
+        // @sequelize/core wraps the pg unique-violation as a
+        // SequelizeUniqueConstraintError whose own `.code` is undefined -
+        // the actual pg code ("23505") only lives on `error.cause` (the
+        // deprecated `.parent`/`.original` also carry it). Only `email` has
+        // a unique constraint on the User model, so a collision here always
+        // means "email already exists".
+        if (error.name === "SequelizeUniqueConstraintError" || error.cause?.code === "23505") {
             return res.status(409).json({
-                message:"username already exist"
+                message: "Email already exists"
             });
         }
 
@@ -479,6 +485,46 @@ async function deleteAccount(req,res){
     }
 }
 
+/**
+ * PATCH /v1/sign/change-password  (auth required)
+ * Body: {currentPassword, newPassword}. Unlike forgot/reset-password (which
+ * exist for someone who is locked out and needs an emailed token), this is
+ * the in-app "I know my password, just want a new one" path - confirm the
+ * current one, hash and store the new one. Doesn't touch other sessions;
+ * use /sign/logout-all separately if you also want to sign out elsewhere.
+ */
+async function changePassword(req,res){
+    try{
+        const { currentPassword, newPassword } = req.body;
+
+        if(!currentPassword || !newPassword){
+            return res.status(400).json({
+                message:"Current password and new password are required"
+            });
+        }
+
+        const user = await User.findOne({ where:{ id:req.user.id } });
+        if(!user){
+            return res.status(404).json({ message:"User not found" });
+        }
+
+        const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+        if(!passwordMatch){
+            return res.status(401).json({ message:"Current password is incorrect" });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        logger.info(`User ${user.id} changed their password`);
+
+        res.json({ message: "Password changed successfully" });
+    } catch (error) {
+        logger.error(error.stack || error.message);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 export default {
     signin,
     signup,
@@ -487,5 +533,6 @@ export default {
     logoutAll,
     forgotPassword,
     resetPassword,
+    changePassword,
     deleteAccount
 }

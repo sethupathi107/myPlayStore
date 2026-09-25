@@ -61,7 +61,13 @@ class User extends Model {
   );
 
   User.addHook("afterDestroy", async (instance, options) => {
-    const { Application, Installed, Session } = instance.sequelize.models;
+    // instance.sequelize.models is a Set of model classes in this
+    // @sequelize/core v7 alpha (not the plain {ModelName: Model} object v6
+    // had), so it has to be looked up by .name instead of destructured.
+    const modelsByName = Object.fromEntries(
+        [...instance.sequelize.models].map((model) => [model.name, model])
+    );
+    const { Application, Installed, Session } = modelsByName;
 
     const apps = await Application.findAll({
         where: { userId: instance.id },
