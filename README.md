@@ -131,31 +131,17 @@ service, and the frontend as a static site.
    `storefront-postgres` external connection string shown in Render's
    dashboard, exactly as described in
    [`db-seed/README.md`](db-seed/README.md).
-7. After every cold start (the free backend/OpenSearch services sleep
-   after 15 minutes idle and lose anything not in Postgres on wake), open
-   `storefront-backend`'s **Shell** tab in Render and run
-   `node src/opensearch/reindexApplications.js` to rebuild the search
-   index — otherwise `/v1/app/search` returns nothing until it's rebuilt.
 
-**This blueprint is set to Render's free tier everywhere, which means:**
-- `storefront-postgres` / `storefront-redis`: free databases expire after
-  90 days and need recreating (and re-seeding) — fine for a demo/portfolio
-  deploy, not for anything you need to keep running indefinitely.
-- `storefront-backend` / `storefront-opensearch`: free services spin down
-  after ~15 minutes idle; the next request wakes them back up but eats a
-  cold-start delay (worse for OpenSearch, a JVM app, on 512MB RAM).
-- **No persistent disks on the free plan** — anything written to
-  `backend/uploads` (uploaded APKs, uploaded images via
-  `src/middlewares/uploadImage.js`) is **lost** on every restart/redeploy/
-  wake-from-sleep. Same for the OpenSearch index (see step 7 above) — but
-  that one's harmless since Postgres is the real source of truth and the
-  index is just rebuilt from it.
-- `backend/app-images` is unaffected either way — it's committed seed/demo
-  content baked into the image at build time, nothing writes to it at
-  runtime.
-- Bump the relevant `plan:` fields to `starter` (~$7/mo each) and add back
-  a `disk:` block on `storefront-backend` once uploads need to actually
-  persist, or once the cold-start delay becomes a real problem.
+**Known limitations of this blueprint:**
+- Render's free Postgres/Redis plans expire after 90 days and free static
+  sites/web services spin down on idle — fine for a demo, not for anything
+  long-lived. Bump the `plan:` fields once you need it to stick around.
+- `backend/uploads` is backed by a 5GB Render Disk, so uploaded APKs
+  (`uploads/`) and uploaded screenshots/icons (`uploads/images/`, see
+  `src/middlewares/uploadImage.js`) both survive redeploys.
+  `backend/app-images` is just committed seed/demo content baked into the
+  image at build time — nothing writes to it at runtime, so it needs no
+  disk.
 - This was written against Render's blueprint spec as documented at the
   time; field names (`runtime`, `type: redis`, etc.) do shift over time —
   if Render's dashboard rejects a field, check their current
