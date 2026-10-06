@@ -54,7 +54,9 @@ services:
     # a demo; move to a paid plan + disk (or S3-compatible storage) before
     # relying on this for real uploads.
     autoDeploy: true
-    preDeployCommand: node src/sequelize/config/cli.js up
+    # No preDeployCommand: that field requires a paid plan too. On the
+    # free plan, run migrations by hand from this service's Shell tab
+    # after each deploy that adds one: node src/sequelize/config/cli.js up
     healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
