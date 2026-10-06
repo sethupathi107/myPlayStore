@@ -20,20 +20,21 @@ services:
     runtime: image
     image:
       url: docker.io/opensearchproject/opensearch:2.19.1
-    plan: starter
+    plan: free
+    # No disk: Render's free plan doesn't support persistent disks, so the
+    # index is wiped on every restart/redeploy/wake-from-sleep. That's
+    # recoverable (Postgres is the source of truth) - just run
+    # `node src/opensearch/reindexApplications.js` from the backend's Shell
+    # tab after each cold start to rebuild it.
     envVars:
       - key: discovery.type
         value: single-node
       - key: plugins.security.disabled
         value: "true" # dev-grade: fine for an internal-only service with no public ingress; revisit if that ever changes
       - key: OPENSEARCH_JAVA_OPTS
-        value: "-Xms256m -Xmx256m"
+        value: "-Xms128m -Xmx128m" # free plan's 512MB RAM is tight for a JVM - keep the heap small
       - key: OPENSEARCH_INITIAL_ADMIN_PASSWORD
         sync: false # unused while security is disabled, but the image still requires it to be set
-    disk:
-      name: opensearch-data
-      mountPath: /usr/share/opensearch/data
-      sizeGB: 1
 
   - type: redis
     name: storefront-redis
@@ -46,16 +47,15 @@ services:
     rootDir: backend
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    plan: starter
+    plan: free
+    # No disk: Render's free plan doesn't support persistent disks, so
+    # anything written to backend/uploads (uploaded APKs, uploaded
+    # images) is lost on every restart/redeploy/wake-from-sleep. Fine for
+    # a demo; move to a paid plan + disk (or S3-compatible storage) before
+    # relying on this for real uploads.
     autoDeploy: true
     preDeployCommand: node src/sequelize/config/cli.js up
     healthCheckPath: /healthz
-    disk:
-      # Uploaded APKs/icons/screenshots (backend/uploads, backend/app-images)
-      # live on local disk - without this they're wiped on every deploy.
-      name: backend-uploads
-      mountPath: /usr/src/app/uploads
-      sizeGB: 5
     envVars:
       - key: NODE_ENV
         value: production
