@@ -7,10 +7,10 @@ monorepo with a Node/Express API, a React SPA, and a seed-data kit for local
 development.
 
 ```
-Coding/
-  backend/    Express 5 API — Postgres, OpenSearch, Redis/BullMQ, JWT auth
-  frontend/   React 18 + Vite SPA (plain JavaScript)
-  db-seed/    CSV fixtures + import script for local Postgres
+.
+├── backend/    Express 5 API — Postgres, OpenSearch, Redis/BullMQ, JWT auth
+├── frontend/   React 18 + Vite SPA (plain JavaScript)
+└── db-seed/    CSV fixtures + import script for local Postgres
 ```
 
 ## Tech stack
