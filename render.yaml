@@ -1,0 +1,113 @@
+# Render Blueprint for Storefront (backend + frontend + Postgres + Redis + OpenSearch).
+#
+# Deploy: push this file to the repo root, then in Render ->
+# New -> Blueprint -> pick this repo/branch. Render reads this file and
+# provisions everything below. See README.md's "Deploying to Render"
+# section for the full walkthrough and the secrets you'll need to fill in
+# by hand (anything marked sync: false here).
+
+databases:
+  - name: storefront-postgres
+    plan: free
+    databaseName: storefront
+    user: storefront
+
+services:
+  # Internal-only: OpenSearch has no public web ingress, reachable from
+  # other services on this Blueprint at http://storefront-opensearch:9200.
+  - type: pserv
+    name: storefront-opensearch
+    runtime: image
+    image:
+      url: docker.io/opensearchproject/opensearch:2.19.1
+    plan: starter
+    envVars:
+      - key: discovery.type
+        value: single-node
+      - key: plugins.security.disabled
+        value: "true" # dev-grade: fine for an internal-only service with no public ingress; revisit if that ever changes
+      - key: OPENSEARCH_JAVA_OPTS
+        value: "-Xms256m -Xmx256m"
+      - key: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+        sync: false # unused while security is disabled, but the image still requires it to be set
+    disk:
+      name: opensearch-data
+      mountPath: /usr/share/opensearch/data
+      sizeGB: 1
+
+  - type: redis
+    name: storefront-redis
+    plan: free
+    ipAllowList: [] # internal-only, no public access
+
+  - type: web
+    name: storefront-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    autoDeploy: true
+    preDeployCommand: node src/sequelize/config/cli.js up
+    healthCheckPath: /healthz
+    disk:
+      # Uploaded APKs/icons/screenshots (backend/uploads, backend/app-images)
+      # live on local disk - without this they're wiped on every deploy.
+      name: backend-uploads
+      mountPath: /usr/src/app/uploads
+      sizeGB: 5
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: storefront-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: storefront-redis
+          property: connectionString
+      - key: OPENSEARCH_URL
+        value: http://storefront-opensearch:9200
+      - key: CORS_ORIGIN
+        sync: false # set after first deploy, once Render assigns the frontend's URL, e.g. https://storefront-frontend.onrender.com
+      - key: JWT_SECRET
+        generateValue: true
+      - key: REFRESH_SECRET
+        generateValue: true
+      - key: RESET_SECRET
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRY
+        value: 15m
+      - key: REFRESH_TOKEN_EXPIRY
+        value: 7d
+      - key: RESET_TOKEN_EXPIRY
+        value: 15m
+      - key: RATE_LIMIT_USER_WINDOW_MS
+        value: "1000"
+      - key: RATE_LIMIT_USER_MAX
+        value: "5"
+      - key: RATE_LIMIT_AUTH_WINDOW_MS
+        value: "60000"
+      - key: RATE_LIMIT_AUTH_MAX
+        value: "5"
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+
+  - type: web
+    name: storefront-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false # set after first deploy, once Render assigns the backend's URL, e.g. https://storefront-backend.onrender.com/v1

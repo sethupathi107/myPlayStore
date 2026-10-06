@@ -93,6 +93,61 @@ The backend currently has no automated test suite — `backend/src/testing`
 holds ad hoc scripts, and `npm test` at the backend root is a placeholder.
 Treat this as the top priority gap for anyone hardening this API further.
 
+## Deploying to Render
+
+[`render.yaml`](render.yaml) is a [Render Blueprint](https://render.com/docs/blueprint-spec)
+that provisions the whole stack: the backend as a Docker web service, a
+managed Postgres, a managed Redis, OpenSearch as an internal-only private
+service, and the frontend as a static site.
+
+> Vercel is **not** a fit for the backend — it's serverless-only and can't
+> run the long-lived Postgres/Redis/OpenSearch processes or BullMQ workers
+> this app needs. The frontend alone could go on Vercel, but then you'd
+> still need somewhere like Render for the backend anyway, so this uses
+> Render for both.
+
+1. Push this repo to GitHub (already done if you're reading this on
+   GitHub) and connect it to Render.
+2. In the Render dashboard: **New +** → **Blueprint** → pick this repo and
+   branch. Render parses `render.yaml` and lists every service it's about
+   to create.
+3. Before clicking **Apply**, fill in the env vars marked `sync: false`
+   in the blueprint that Render can't infer on its own:
+   - `storefront-opensearch`: `OPENSEARCH_INITIAL_ADMIN_PASSWORD` — any
+     value; it's unused while `plugins.security.disabled=true`, but the
+     image still requires it to be set.
+   - `storefront-backend`: `GMAIL_USER` / `GMAIL_APP_PASSWORD` — needed
+     for password-reset emails (`src/utils/mailer.js`).
+4. Click **Apply**. First deploy will take a few minutes (OpenSearch and
+   Postgres need to come up before the backend's pre-deploy migration
+   step can run).
+5. Once `storefront-backend` and `storefront-frontend` both have live
+   `.onrender.com` URLs, go back into each service's **Environment** tab
+   and set the two remaining placeholders, then manually redeploy both:
+   - `storefront-backend` → `CORS_ORIGIN` = the frontend's URL
+   - `storefront-frontend` → `VITE_API_URL` = the backend's URL + `/v1`
+     (Vite bakes this in at build time, hence the redeploy)
+6. Load the seed data (optional) — run `db-seed/import.sh` against the
+   `storefront-postgres` external connection string shown in Render's
+   dashboard, exactly as described in
+   [`db-seed/README.md`](db-seed/README.md).
+
+**Known limitations of this blueprint:**
+- Render's free Postgres/Redis plans expire after 90 days and free static
+  sites/web services spin down on idle — fine for a demo, not for anything
+  long-lived. Bump the `plan:` fields once you need it to stick around.
+- `backend/uploads` is backed by a 5GB Render Disk, so uploaded APKs
+  (`uploads/`) and uploaded screenshots/icons (`uploads/images/`, see
+  `src/middlewares/uploadImage.js`) both survive redeploys.
+  `backend/app-images` is just committed seed/demo content baked into the
+  image at build time — nothing writes to it at runtime, so it needs no
+  disk.
+- This was written against Render's blueprint spec as documented at the
+  time; field names (`runtime`, `type: redis`, etc.) do shift over time —
+  if Render's dashboard rejects a field, check their current
+  [Blueprint YAML reference](https://render.com/docs/blueprint-spec) for
+  the current name.
+
 ## Architecture overview
 
 ### Request flow

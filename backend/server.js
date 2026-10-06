@@ -66,6 +66,11 @@ app.use(express.json());
 // limiting below, which is scoped per endpoint group instead of global.
 app.use(blockedIpMiddleware);
 
+// Unauthenticated on purpose: hosting platforms (Render, etc.) poll this
+// to decide whether the instance is healthy, long before any client has
+// a token to send.
+app.get("/healthz", (req, res) => res.status(200).json({ status: "ok" }));
+
 app.use("/v1/sign", authRoutes);
 app.use("/queues", bullBoardAdapter.getRouter());
 app.use(auth);
