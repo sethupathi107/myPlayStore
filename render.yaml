@@ -13,9 +13,17 @@ databases:
     user: storefront
 
 services:
-  # Internal-only: OpenSearch has no public web ingress, reachable from
-  # other services on this Blueprint at http://storefront-opensearch:9200.
-  - type: pserv
+  # NOT internal-only, even though it'd ideally be a private service:
+  # Render's free plan doesn't support type: pserv at all ("service type
+  # is not available for this plan"). type: web is the only free option
+  # left, which means this gets a public .onrender.com URL - other
+  # services on this Blueprint still reach it over the private network at
+  # http://storefront-opensearch:9200, but so can anyone on the internet
+  # who finds the public URL, since plugins.security.disabled=true below
+  # leaves it with no auth. Acceptable here only because this index is a
+  # disposable, rebuildable copy of Postgres data (see the reindex note
+  # below) - don't reuse this pattern for anything holding real data.
+  - type: web
     name: storefront-opensearch
     runtime: image
     image:
@@ -30,7 +38,7 @@ services:
       - key: discovery.type
         value: single-node
       - key: plugins.security.disabled
-        value: "true" # dev-grade: fine for an internal-only service with no public ingress; revisit if that ever changes
+        value: "true" # see the public-exposure note above
       - key: OPENSEARCH_JAVA_OPTS
         value: "-Xms128m -Xmx128m" # free plan's 512MB RAM is tight for a JVM - keep the heap small
       - key: OPENSEARCH_INITIAL_ADMIN_PASSWORD

@@ -97,8 +97,8 @@ Treat this as the top priority gap for anyone hardening this API further.
 
 [`render.yaml`](render.yaml) is a [Render Blueprint](https://render.com/docs/blueprint-spec)
 that provisions the whole stack: the backend as a Docker web service, a
-managed Postgres, a managed Redis, OpenSearch as an internal-only private
-service, and the frontend as a static site.
+managed Postgres, a managed Redis, OpenSearch (also a web service — see
+the public-exposure note below), and the frontend as a static site.
 
 > Vercel is **not** a fit for the backend — it's serverless-only and can't
 > run the long-lived Postgres/Redis/OpenSearch processes or BullMQ workers
@@ -149,6 +149,14 @@ service, and the frontend as a static site.
 - `storefront-backend` / `storefront-opensearch`: free services spin down
   after ~15 minutes idle; the next request wakes them back up but eats a
   cold-start delay (worse for OpenSearch, a JVM app, on 512MB RAM).
+- **OpenSearch is publicly reachable.** Render's free plan doesn't support
+  private services (`type: pserv`) at all, so it has to run as a public
+  `type: web` service instead, with no authentication
+  (`plugins.security.disabled=true`) — anyone who finds its
+  `.onrender.com` URL can read or write the search index directly. That's
+  an acceptable trade only because the index is a disposable, rebuildable
+  copy of Postgres data (see step 8 above); don't reuse this pattern for
+  anything that holds real data.
 - **No persistent disks on the free plan** — anything written to
   `backend/uploads` (uploaded APKs, uploaded images via
   `src/middlewares/uploadImage.js`) is **lost** on every restart/redeploy/
