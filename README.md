@@ -118,25 +118,20 @@ service, and the frontend as a static site.
      image still requires it to be set.
    - `storefront-backend`: `GMAIL_USER` / `GMAIL_APP_PASSWORD` — needed
      for password-reset emails (`src/utils/mailer.js`).
-4. Click **Apply**. First deploy will take a few minutes.
-5. Run migrations by hand — the free plan doesn't support
-   `preDeployCommand`. Open `storefront-backend`'s **Shell** tab in Render
-   and run:
-   ```bash
-   node src/sequelize/config/cli.js up
-   ```
-   (Repeat this after any future deploy that adds a new migration.)
-6. Once `storefront-backend` and `storefront-frontend` both have live
+4. Click **Apply**. First deploy will take a few minutes (OpenSearch and
+   Postgres need to come up before the backend's pre-deploy migration
+   step can run).
+5. Once `storefront-backend` and `storefront-frontend` both have live
    `.onrender.com` URLs, go back into each service's **Environment** tab
    and set the two remaining placeholders, then manually redeploy both:
    - `storefront-backend` → `CORS_ORIGIN` = the frontend's URL
    - `storefront-frontend` → `VITE_API_URL` = the backend's URL + `/v1`
      (Vite bakes this in at build time, hence the redeploy)
-7. Load the seed data (optional) — run `db-seed/import.sh` against the
+6. Load the seed data (optional) — run `db-seed/import.sh` against the
    `storefront-postgres` external connection string shown in Render's
    dashboard, exactly as described in
    [`db-seed/README.md`](db-seed/README.md).
-8. After every cold start (the free backend/OpenSearch services sleep
+7. After every cold start (the free backend/OpenSearch services sleep
    after 15 minutes idle and lose anything not in Postgres on wake), open
    `storefront-backend`'s **Shell** tab in Render and run
    `node src/opensearch/reindexApplications.js` to rebuild the search
